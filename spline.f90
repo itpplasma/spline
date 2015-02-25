@@ -25,8 +25,6 @@ contains
 
     h = x(2:) - x(1:n-1)
     r = y(2:) - y(1:n-1)
-
-    
     
     dl = h(2:n-2)
     du = h(2:n-2)
@@ -35,8 +33,6 @@ contains
     c = 3d0*(r(2:)/h(2:)-r(1:n-2)/h(1:n-2))
     
     call dgtsv(n-2, 1, dl, d, du, c, n-2, info)
-
-    !print *,b
 
     spline_coeff = 0d0
     spline_coeff(:,1)     = x(1:n-1)
@@ -80,8 +76,6 @@ contains
     if (j==0) j=1
     if (j==n) j=n-1
 
-    print *,j,n
-
     z = x - coeff(j,1)
     spline_val_0 = ((coeff(j,5)*z+coeff(j,4))*z+coeff(j,3))*z+coeff(j,2)
   end function spline_val_0
@@ -97,6 +91,7 @@ contains
     !! Variables
     integer :: k
 
+    ! TODO: make this more efficient
     do k=1,size(x)
        spline_val(k) = spline_val_0(coeff, x(k))
     end do
