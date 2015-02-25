@@ -8,7 +8,7 @@ module spline
 
 contains
 
-  function spline_coeff(x, y)
+    function spline_coeff(x, y)
     !
     ! returns spline coefficients
     !
@@ -18,34 +18,37 @@ contains
     real(8) :: spline_coeff(size(x)-1,5)
     !! Variables
     integer :: n, info
-    real(8) :: r(size(x)-1), &
-         dl(size(x)-1), du(size(x)-1), d(size(x)), b(size(x))
+    real(8) :: r(size(x)-1), h(size(x)-1),&
+         dl(size(x)-3), du(size(x)-3), d(size(x)-2), c(size(x)-2)
 
     n = size(x)
 
+    h = x(2:) - x(1:n-1)
     r = y(2:) - y(1:n-1)
-    
-    dl = 1d0
-    du = 1d0
-    d = 4d0
-    d(1) = 2d0
-    d(n) = 2d0
 
-    b(1) = 3d0*r(1)
-    b(2:n-1) = 3d0*(y(3:)-y(1:n-2))
-    b(n) = 3d0*r(n-1)
     
-    call dgtsv(n, 1, dl, d, du, b, n, info)
+    
+    dl = h(2:n-2)
+    du = h(2:n-2)
+    d = 2d0*(h(1:n-2)+h(2:))
+
+    c = 3d0*(r(2:)/h(2:)-r(1:n-2)/h(1:n-2))
+    
+    call dgtsv(n-2, 1, dl, d, du, c, n-2, info)
 
     !print *,b
 
     spline_coeff = 0d0
-    spline_coeff(:,1) = x(1:n-1)
-    spline_coeff(:,2) = y(1:n-1)
-    spline_coeff(:,3) = b(1:n-1)
-    spline_coeff(:,4) = 3*r - 2*b(1:n-1) - b(2:n) 
-    spline_coeff(:,5) = -2*r + b(1:n-1) + b(2:n)
-    spline_coeff(:,6) = x(2:) - x(1:n-1)
+    spline_coeff(:,1)     = x(1:n-1)
+    spline_coeff(:,2)     = y(1:n-1)
+    spline_coeff(1,3)     = r(1)/h(1) - h(1)/3d0*c(1)
+    spline_coeff(2:n-2,3) = r(2:n-2)/h(2:n-2)-h(2:n-2)/3d0*(c(2:n-2)+2*c(1:n-3))
+    spline_coeff(n-1,3)   = r(n-1)/h(n-1)-h(n-1)/3d0*(2*c(n-2))
+    spline_coeff(1,4)     = 0
+    spline_coeff(2:,4)    = c
+    spline_coeff(1,5)     = 1/(3*h(1))*c(1)
+    spline_coeff(2:n-2,5) = 1/(3*h(2:n-2))*(c(2:n-2)-c(1:n-3))
+    spline_coeff(n-1,5)   = 1/(3*h(n-1))*(-c(n-2))
   end function spline_coeff
 
   function spline_val_0(coeff, x)
@@ -79,7 +82,7 @@ contains
 
     print *,j,n
 
-    z = (x - coeff(j,1))/coeff(j,6)
+    z = x - coeff(j,1)
     spline_val_0 = ((coeff(j,5)*z+coeff(j,4))*z+coeff(j,3))*z+coeff(j,2)
   end function spline_val_0
   
