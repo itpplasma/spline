@@ -19,7 +19,7 @@ contains
     !! Variables
     integer :: n, info
     real(8) :: r(size(x)-1), h(size(x)-1),&
-         dl(size(x)-3), du(size(x)-3), d(size(x)-2), c(size(x)-2)
+         dl(size(x)-3), d(size(x)-2), c(size(x)-2)
 
     n = size(x)
 
@@ -27,13 +27,15 @@ contains
     r = y(2:) - y(1:n-1)
     
     dl = h(2:n-2)
-    du = h(2:n-2)
     d = 2d0*(h(1:n-2)+h(2:))
+
+    !print *,dl
+    !print *,d
 
     c = 3d0*(r(2:)/h(2:)-r(1:n-2)/h(1:n-2))
     
-    call dgtsv(n-2, 1, dl, d, du, c, n-2, info)
-
+    call dptsv(n-2, 1, d, dl, c, n-2, info)
+    
     spline_coeff = 0d0
     spline_coeff(:,1)     = x(1:n-1)
     spline_coeff(:,2)     = y(1:n-1)
@@ -49,12 +51,12 @@ contains
 
   function spline_val_0(coeff, x)
     !
-    ! returns spline coefficients
+    ! returns spline values
     !
     !! Input
     real(8) :: x, coeff(:,:)
     !! Output
-    real(8) :: spline_val_0
+    real(8) :: spline_val_0(3)
     !! Variables
     real(8) :: z
     integer :: n, ju, jl, jm, j
@@ -77,7 +79,9 @@ contains
     if (j==n) j=n-1
 
     z = x - coeff(j,1)
-    spline_val_0 = ((coeff(j,5)*z+coeff(j,4))*z+coeff(j,3))*z+coeff(j,2)
+    spline_val_0(1) = ((coeff(j,5)*z+coeff(j,4))*z+coeff(j,3))*z+coeff(j,2)
+    spline_val_0(2) = (3d0*coeff(j,5)*z+2d0*coeff(j,4))*z+coeff(j,3)
+    spline_val_0(3) = 6d0*coeff(j,5)*z+2d0*coeff(j,4)
   end function spline_val_0
   
   function spline_val(coeff, x)
@@ -87,13 +91,13 @@ contains
     !! Input
     real(8) :: x(:), coeff(:,:)
     !! Output
-    real(8) :: spline_val(size(x))
+    real(8) :: spline_val(size(x),3)
     !! Variables
     integer :: k
 
     ! TODO: make this more efficient
     do k=1,size(x)
-       spline_val(k) = spline_val_0(coeff, x(k))
+       spline_val(k,:) = spline_val_0(coeff, x(k))
     end do
 
   end function spline_val
