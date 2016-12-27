@@ -1,7 +1,7 @@
 objects_f90 = spline.o spline_test.o
 
 FC = gfortran
-FLAGS = -Wall -Wno-unused-dummy-argument -g -O2 -llapack -lopenblas -L../contrib/OpenBLAS/ 
+FLAGS = -Wall -Wno-unused-dummy-argument -g -O2 -lopenblas -lpthread -L../contrib/OpenBLAS/ 
 #LIBS = ../contrib/OpenBLAS
 
 #FC = ifort

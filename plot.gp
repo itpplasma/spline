@@ -1,6 +1,6 @@
 #!/usr/bin/gnuplot
 
-set term x11
+#set term x11
 bind Close "exit gnuplot"
 
 set multiplot layout 2,2 
