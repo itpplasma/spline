@@ -7,11 +7,12 @@ enable_language(Fortran)
 set(PROJECT_EXE_NAME "spline_test")
 
 ### Set compiler flags
-set(CMAKE_Fortran_MODULE_DIRECTORY ./OBJS)
-set(CMAKE_Fortran_FLAGS "-mkl -O3")
+#set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/OBJS)
+#set(CMAKE_Fortran_FLAGS "-O3") #GNU
+#set(CMAKE_Fortran_FLAGS "-mkl -O3") #INTEL
 
 ### Define library
-add_library(spline
+add_library(spline SHARED
   spline.f90
 )
 
@@ -21,8 +22,12 @@ add_executable(${PROJECT_EXE_NAME}
 )
 
 target_link_libraries(
+  spline
+  openblas
+  pthread
+ )
+
+target_link_libraries(
   ${PROJECT_EXE_NAME}
   spline
-  #blas
-  pthread
 )
