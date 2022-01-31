@@ -1,5 +1,5 @@
 ### Basic settings
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.12)
 
 ### Define the project
 project (spline)
@@ -21,9 +21,12 @@ add_executable(${PROJECT_EXE_NAME}
   spline_test.f90
 )
 
+find_package(BLAS)
+find_package(LAPACK)
+
 target_link_libraries(
   spline
-  openblas
+  ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES}
   pthread
  )
 
