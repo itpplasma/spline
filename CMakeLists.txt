@@ -7,7 +7,7 @@ enable_language(Fortran)
 set(PROJECT_EXE_NAME "spline_test")
 
 ### Define library
-add_library(spline SHARED
+add_library(spline STATIC
   spline.f90
 )
 
