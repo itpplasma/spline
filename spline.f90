@@ -4,7 +4,9 @@ module spline
   ! https://itp.tugraz.at/LV/sormann/NumPhysik/
 
   implicit none
-  save
+
+  integer :: j_start = 1  ! start index for spline_val_0 saved for efficiency
+  !$omp threadprivate(j_start)
 
 contains
 
@@ -50,38 +52,32 @@ contains
   end function spline_coeff
 
   function spline_val_0(coeff, x)
-    !
-    ! returns spline values
-    !
-    !! Input
-    real(8) :: x, coeff(:,:)
-    !! Output
     real(8) :: spline_val_0(3)
-    !! Variables
+    real(8), intent(in) :: x, coeff(:,:)
     real(8) :: z
-    integer :: n, ju, jl, jm, j
+    integer :: n, j
 
-    n = size(coeff,1)+1
-    jl = 0
-    ju = n
+    n = size(coeff, 1) + 1
 
-    do while (ju-jl > 1)
-       jm = (jl+ju)/2
-       if (x > coeff(jm,1)) then
-          jl = jm
-       else
-          ju = jm
-       end if
-    end do
+    j = j_start
 
-    j = jl
-    if (j==0) j=1
-    if (j==n) j=n-1
+    if (j < 1 .or. j >= n) j = 1
+    if (x < coeff(j, 1)) then
+      do while (j > 1 .and. x < coeff(j, 1))
+        j = j - 1
+      end do
+    else if (j < n - 1 .and. x >= coeff(j + 1, 1)) then
+      do while (j < n - 1 .and. x >= coeff(j + 1, 1))
+        j = j + 1
+      end do
+    end if
 
-    z = x - coeff(j,1)
-    spline_val_0(1) = ((coeff(j,5)*z+coeff(j,4))*z+coeff(j,3))*z+coeff(j,2)
-    spline_val_0(2) = (3d0*coeff(j,5)*z+2d0*coeff(j,4))*z+coeff(j,3)
-    spline_val_0(3) = 6d0*coeff(j,5)*z+2d0*coeff(j,4)
+    j_start = j
+
+    z = x - coeff(j, 1)
+    spline_val_0(1) = ((coeff(j, 5) * z + coeff(j, 4)) * z + coeff(j, 3)) * z + coeff(j, 2)
+    spline_val_0(2) = (3d0 * coeff(j, 5) * z + 2d0 * coeff(j, 4)) * z + coeff(j, 3)
+    spline_val_0(3) = 6d0 * coeff(j, 5) * z + 2d0 * coeff(j, 4)
   end function spline_val_0
 
   function spline_val(coeff, x)
