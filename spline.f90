@@ -67,7 +67,7 @@ contains
         j = j - 1
       end do
     else if (j < n - 1 .and. x >= coeff(j + 1, 1)) then
-      do while (j < n - 2 .and. x >= coeff(j + 1, 1))
+      do while (j < n - 1 .and. x >= coeff(j + 1, 1))
         j = j + 1
       end do
     end if
